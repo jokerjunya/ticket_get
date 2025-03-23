@@ -298,6 +298,85 @@ app.post('/api/event/save', (req, res) => {
   }
 });
 
+// イベント情報をURLから解析するエンドポイント
+app.post('/api/parse-event', async (req, res) => {
+  const { url } = req.body;
+  
+  if (!url) {
+    return res.status(400).json({ error: 'URLが指定されていません' });
+  }
+  
+  console.log(`イベント情報解析リクエスト: ${url}`);
+  
+  // URLがローソンチケットのものか確認
+  if (!url.includes('l-tike.com')) {
+    return res.status(400).json({ error: 'ローソンチケットのURLではありません' });
+  }
+  
+  try {
+    // ここではサンプルの応答を返す
+    // 実際にはPuppeteerなどを使ってURLからイベント情報をスクレイピングする
+    const mockData = {
+      title: 'サンプルコンサート2023',
+      venue: '東京ドーム',
+      date: '2023/12/31',
+      saleStartTime: '2023-05-01T10:00',
+      seatType: 'S席',
+      quantity: 2,
+      url: url,
+    };
+    
+    // 実際のスクレイピング実装は以下のようなコードになる
+    /*
+    // Puppeteerでページを開く
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    
+    // ページからイベント情報を抽出
+    const title = await page.$eval('.event-title', el => el.textContent.trim()).catch(() => 'タイトル不明');
+    const venue = await page.$eval('.venue-name', el => el.textContent.trim()).catch(() => '');
+    const date = await page.$eval('.performance-date', el => el.textContent.trim()).catch(() => '');
+    
+    // 販売開始日時の処理（例）
+    let saleStartTime = '';
+    try {
+      const saleStartText = await page.$eval('.sale-start-datetime', el => el.textContent.trim());
+      // テキストから日時を抽出してフォーマット
+      const match = saleStartText.match(/(\d{4})年(\d{1,2})月(\d{1,2})日\s*(\d{1,2}):(\d{2})/);
+      if (match) {
+        const [_, year, month, day, hour, minute] = match;
+        saleStartTime = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute}`;
+      }
+    } catch (e) {
+      console.error('販売開始時刻の取得に失敗:', e);
+    }
+    
+    // ブラウザを閉じる
+    await browser.close();
+    
+    const eventData = {
+      title,
+      venue,
+      date,
+      saleStartTime,
+      seatType: '',  // ページから取得できない場合は空文字
+      quantity: 2,   // デフォルト値を設定
+      url: url,
+    };
+    */
+    
+    // 処理の遅延をシミュレート（実際のスクレイピングには時間がかかる）
+    setTimeout(() => {
+      res.json(mockData);
+    }, 2000);
+    
+  } catch (error) {
+    console.error('イベント情報解析エラー:', error);
+    res.status(500).json({ error: 'イベント情報の解析に失敗しました' });
+  }
+});
+
 // テスト実行関連 ============================
 
 // テスト情報保存APIエンドポイント

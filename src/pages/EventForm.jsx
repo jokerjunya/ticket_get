@@ -24,6 +24,7 @@ const EventForm = () => {
   const [showTestModal, setShowTestModal] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showParsedNotice, setShowParsedNotice] = useState(false);
   
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +40,37 @@ const EventForm = () => {
   // 既存のイベント情報があれば読み込む
   useEffect(() => {
     const loadEventInfo = async () => {
+      // まず解析済みのイベント情報があるか確認
+      try {
+        const parsedEventInfo = localStorage.getItem('parsed_event_info');
+        if (parsedEventInfo) {
+          const eventData = JSON.parse(parsedEventInfo);
+          setFormData(prevState => ({
+            ...prevState,
+            ticketUrl: eventData.url || eventData.ticketUrl || prevState.ticketUrl,
+            saleStartTime: eventData.saleStartTime || prevState.saleStartTime,
+            seatType: eventData.seatType || eventData.seat || prevState.seatType,
+            quantity: eventData.quantity || prevState.quantity,
+          }));
+          
+          // 解析データを使用したことをユーザーに通知
+          setShowParsedNotice(true);
+          setTimeout(() => {
+            setShowParsedNotice(false);
+          }, 5000);
+          
+          // 解析済みデータを消去（重複適用防止）
+          localStorage.removeItem('parsed_event_info');
+          
+          // データが読み込まれたら保存済み状態にする
+          setIsSaved(true);
+          return; // 解析データが読み込まれたら他のソースは確認しない
+        }
+      } catch (e) {
+        console.error('解析済みイベント情報の読み込みエラー:', e);
+      }
+      
+      // 解析データがない場合は通常通りサーバーからロード
       try {
         // サーバーからイベント情報を取得
         const response = await fetch(`${apiUrl}/api/event/info`);
@@ -78,6 +110,28 @@ const EventForm = () => {
     
     loadEventInfo();
   }, [apiUrl]);
+  
+  // URLからイベント情報を解析する処理
+  const handleParseEvent = () => {
+    if (!formData.ticketUrl) {
+      setErrors({
+        ...errors,
+        ticketUrl: 'URLを入力してください'
+      });
+      return;
+    }
+    
+    // エラーをクリア
+    if (errors.ticketUrl) {
+      setErrors({
+        ...errors,
+        ticketUrl: ''
+      });
+    }
+    
+    // 解析画面へ遷移
+    navigate(`/parse-event?url=${encodeURIComponent(formData.ticketUrl)}`);
+  };
   
   // 入力変更の処理
   const handleChange = (e) => {
@@ -363,7 +417,7 @@ const EventForm = () => {
       </h2>
       
       {/* ローチケで探すボタン */}
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={handleSearchLawson}
@@ -382,8 +436,17 @@ const EventForm = () => {
           </div>
         )}
         
+        {showParsedNotice && (
+          <div className="p-3 mb-4 rounded-md bg-yellow-50 text-yellow-700 border border-yellow-200">
+            <p className="flex items-center">
+              <span className="mr-2">ℹ️</span>
+              URLから自動的にイベント情報を読み取りました。内容を確認してください。
+            </p>
+          </div>
+        )}
+        
         {/* イベント情報が保存済みの場合、メッセージを表示 */}
-        {isSaved && !message.text && (
+        {isSaved && !message.text && !showParsedNotice && (
           <div className="p-3 mb-4 rounded-md bg-blue-50 text-blue-700">
             現在の情報が保存されています
           </div>
@@ -408,13 +471,24 @@ const EventForm = () => {
               <button
                 type="button"
                 onClick={handlePasteUrl}
-                className="bg-gray-100 text-gray-700 border border-gray-300 border-l-0 px-3 py-2 rounded-r-md hover:bg-gray-200 transition"
+                className="bg-gray-100 text-gray-700 border border-gray-300 border-l-0 px-3 py-2 hover:bg-gray-200 transition"
                 title="クリップボードからURLを貼り付け"
               >
                 📋
               </button>
+              <button
+                type="button"
+                onClick={handleParseEvent}
+                className="bg-blue-500 text-white border border-blue-600 border-l-0 px-3 py-2 rounded-r-md hover:bg-blue-600 transition"
+                title="URLから情報を取得"
+              >
+                🔍
+              </button>
             </div>
             {errors.ticketUrl && <p className="mt-1 text-xs text-red-500">{errors.ticketUrl}</p>}
+            <p className="mt-1 text-xs text-gray-500">
+              🔍 ボタンを押すとURLからイベント情報を自動取得できます
+            </p>
           </div>
           
           <div className="mb-4">

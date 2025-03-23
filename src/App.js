@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import AccountSettings from './pages/AccountSettings';
 import EventForm from './pages/EventForm';
+import ParseEventPage from './pages/ParseEventPage';
 
 // 本番環境でのベースパス設定
 const getBasename = () => {
@@ -25,6 +26,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/account" element={<AccountSettings />} />
               <Route path="/event" element={<EventForm />} />
+              <Route path="/parse-event" element={<ParseEventPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
