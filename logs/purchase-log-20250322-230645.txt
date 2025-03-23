@@ -1,0 +1,6 @@
+[START] 2025-03-22T14:06:45.821Z
+[URL] https://l-tike.com/orderpage/test
+[STATUS] FAILED
+[ERROR] エラーが発生しました: CAPTCHA が検出されました。手動での対応が必要です。
+[ERROR] CAPTCHA対応後も失敗しました: 手動対応失敗
+[END] 2025-03-22T14:06:45.821Z

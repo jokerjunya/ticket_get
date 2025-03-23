@@ -1,0 +1,6 @@
+# Netlifyでのシングルページアプリケーション用リダイレクト設定
+# すべてのルートをindex.htmlにリダイレクト
+/*    /index.html   200
+
+# APIのプロキシ設定（APIを別サーバーでホストする場合）
+# /api/*  https://your-api-server.example.com/api/:splat  200 

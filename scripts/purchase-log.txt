@@ -1,0 +1,14 @@
+[2025-03-22T14:06:36.129Z] [INFO] ログ機能のテストを開始します
+[2025-03-22T14:06:36.134Z] [SUCCESS] テスト実行完了
+[2025-03-22T14:06:36.134Z] [INFO] ログファイル purchase-log-20250322-230636.txt が logs ディレクトリに作成されました
+[2025-03-22T14:06:36.134Z] [INFO] ログのパス: /Users/junyatakei/Documents/cursor/ticket_get/logs/purchase-log-20250322-230636.txt
+[2025-03-22T14:06:41.458Z] [INFO] ログ機能のテストを開始します
+[2025-03-22T14:06:41.463Z] [ERROR] エラーが発生しました: テスト用のエラーメッセージ
+[2025-03-22T14:06:41.463Z] [INFO] ログファイル purchase-log-20250322-230641.txt が logs ディレクトリに作成されました
+[2025-03-22T14:06:41.463Z] [INFO] ログのパス: /Users/junyatakei/Documents/cursor/ticket_get/logs/purchase-log-20250322-230641.txt
+[2025-03-22T14:06:45.816Z] [INFO] ログ機能のテストを開始します
+[2025-03-22T14:06:45.821Z] [ERROR] エラーが発生しました: CAPTCHA が検出されました。手動での対応が必要です。
+[2025-03-22T14:06:45.821Z] [WARNING] CAPTCHAが検出されました。手動での操作をお願いします。
+[2025-03-22T14:06:45.821Z] [ERROR] CAPTCHA対応後も失敗しました: 手動対応失敗
+[2025-03-22T14:06:45.821Z] [INFO] ログファイル purchase-log-20250322-230645.txt が logs ディレクトリに作成されました
+[2025-03-22T14:06:45.822Z] [INFO] ログのパス: /Users/junyatakei/Documents/cursor/ticket_get/logs/purchase-log-20250322-230645.txt

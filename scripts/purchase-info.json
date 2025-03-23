@@ -1,0 +1,13 @@
+{
+  "url": "https://l-tike.com/orderpage/test",
+  "saleTime": "2025-03-25T10:00:00+09:00",
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "テスト太郎",
+  "phone": "09012345678",
+  "birth": "1990-01-01",
+  "seat": "S席",
+  "quantity": 2,
+  "payment": "クレジットカード",
+  "delivery": "郵送"
+} 

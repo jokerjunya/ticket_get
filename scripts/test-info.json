@@ -1,0 +1,12 @@
+{
+  "url": "https://example.com/test-ticket-page",
+  "email": "test@example.com",
+  "password": "testpass123",
+  "quantity": 2,
+  "seat": "テストエリア",
+  "payment": "クレジットカード",
+  "delivery": "電子チケット",
+  "name": "ヤマダタロウ",
+  "phone": "09012345678",
+  "birth": "1990-01-01"
+} 

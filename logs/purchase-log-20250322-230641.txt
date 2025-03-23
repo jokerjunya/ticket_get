@@ -1,0 +1,5 @@
+[START] 2025-03-22T14:06:41.463Z
+[URL] https://l-tike.com/orderpage/test
+[STATUS] FAILED
+[ERROR] エラーが発生しました: テスト用のエラーメッセージ
+[END] 2025-03-22T14:06:41.463Z
