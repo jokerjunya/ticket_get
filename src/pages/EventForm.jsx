@@ -18,7 +18,7 @@ const EventForm = () => {
   });
   
   const [errors, setErrors] = useState({});
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // 保存状態を管理（将来的な拡張用）
   const [isTestRunning, setIsTestRunning] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [showTestModal, setShowTestModal] = useState(false);
@@ -52,6 +52,8 @@ const EventForm = () => {
             quantity: eventData.quantity || 1,
             seatType: eventData.seatType || '',
           }));
+          // 既存のデータが読み込まれたら保存済み状態にする
+          setIsSaved(true);
         }
       } catch (error) {
         console.error('イベント情報読み込みエラー:', error);
@@ -65,6 +67,8 @@ const EventForm = () => {
               ...prevState,
               ...eventData
             }));
+            // ローカルストレージからデータが読み込まれたら保存済み状態にする
+            setIsSaved(true);
           }
         } catch (e) {
           console.error('ローカルストレージからの読み込みエラー:', e);
@@ -375,6 +379,13 @@ const EventForm = () => {
             message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
           }`}>
             {message.text}
+          </div>
+        )}
+        
+        {/* イベント情報が保存済みの場合、メッセージを表示 */}
+        {isSaved && !message.text && (
+          <div className="p-3 mb-4 rounded-md bg-blue-50 text-blue-700">
+            現在の情報が保存されています
           </div>
         )}
         

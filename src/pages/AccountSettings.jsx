@@ -14,7 +14,7 @@ const AccountSettings = () => {
   
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // 保存状態を管理（UI表示用）
   const [message, setMessage] = useState({ type: '', text: '' });
   
   const { user, isAuthenticated, updateUserProfile } = useAuth();
@@ -50,24 +50,26 @@ const AccountSettings = () => {
             paymentMethod: userData.paymentMethod || 'クレジットカード',
             deliveryMethod: userData.deliveryMethod || '電子チケット'
           });
-        } else {
-          console.error('プロファイル取得エラー:', await response.text());
+          // データがロードされたら保存済み状態にする
+          setIsSaved(true);
         }
       } catch (error) {
-        console.error('ユーザー情報読み込みエラー:', error);
+        console.error('ユーザー情報取得エラー:', error);
         
-        // デモモード: ローカルストレージからプロファイル取得
+        // APIエラー時はローカルストレージを試す
         try {
-          const storedProfile = localStorage.getItem('user_profile');
-          if (storedProfile) {
-            const profileData = JSON.parse(storedProfile);
-            setFormData(prevData => ({
-              ...prevData,
-              ...profileData
+          const storedUserInfo = localStorage.getItem('user_profile');
+          if (storedUserInfo) {
+            const userData = JSON.parse(storedUserInfo);
+            setFormData(prevState => ({
+              ...prevState,
+              ...userData
             }));
+            // ローカルストレージからデータが読み込まれたら保存済み状態にする
+            setIsSaved(true);
           }
-        } catch (e) {
-          console.error('ローカルストレージからの読み込みエラー:', e);
+        } catch (storageError) {
+          console.error('ローカルストレージからの読み込みエラー:', storageError);
         }
       }
     };
@@ -75,38 +77,37 @@ const AccountSettings = () => {
     loadUserInfo();
   }, [user]);
   
-  // 入力値の変更を処理
+  // 入力変更の処理
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
+    setFormData({
+      ...formData,
       [name]: value
-    }));
+    });
     
     // エラーをクリア
     if (errors[name]) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
+      setErrors({
+        ...errors,
         [name]: ''
-      }));
+      });
     }
     
+    // 保存済み状態をリセット
     setIsSaved(false);
   };
   
-  // フォームのバリデーション
+  // バリデーション処理
   const validateForm = () => {
     const newErrors = {};
     
     // 必須項目チェック
     if (!formData.name) newErrors.name = '氏名を入力してください';
     if (!formData.phone) newErrors.phone = '電話番号を入力してください';
-    if (!formData.birthdate) newErrors.birthdate = '生年月日を入力してください';
-    
-    // 電話番号の形式チェック
-    if (formData.phone && !/^\d{10,11}$/.test(formData.phone.replace(/-/g, ''))) {
-      newErrors.phone = '正しい電話番号を入力してください';
+    else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/-/g, ''))) {
+      newErrors.phone = '有効な電話番号を入力してください';
     }
+    if (!formData.birthdate) newErrors.birthdate = '生年月日を入力してください';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -124,23 +125,22 @@ const AccountSettings = () => {
     setMessage({ type: '', text: '' });
     
     try {
-      // APIへのプロファイル更新リクエスト
+      // APIにユーザー情報を送信
       const response = await fetch('/api/user/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.token}`
+          'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
       
       if (response.ok) {
-        // 成功時の処理
-        setIsSaved(true);
-        setMessage({ type: 'success', text: 'アカウント情報を保存しました' });
-        
-        // ユーザープロファイル情報を更新
+        // ユーザーコンテキストも更新
         updateUserProfile(formData);
+        
+        setIsSaved(true);
+        setMessage({ type: 'success', text: '設定を保存しました' });
         
         // 成功メッセージを表示して3秒後に消す
         setTimeout(() => {
@@ -148,37 +148,20 @@ const AccountSettings = () => {
         }, 3000);
       } else {
         const errorData = await response.json();
-        setMessage({ type: 'error', text: errorData.message || 'プロファイル更新に失敗しました' });
+        setMessage({ type: 'error', text: errorData.message || '設定の保存に失敗しました' });
       }
     } catch (error) {
-      console.error('プロファイル更新エラー:', error);
+      console.error('設定保存エラー:', error);
       
-      // デモモード: サーバー接続エラー時はローカルストレージに保存
+      // オフラインモード: ローカルストレージに保存
       try {
         localStorage.setItem('user_profile', JSON.stringify(formData));
         
-        // ユーザープロファイル情報を更新（コンテキスト）
+        // ユーザーコンテキストも更新
         updateUserProfile(formData);
         
-        // user-info.json にもデータを保存（ファイル保存機能）
-        try {
-          const saveResponse = await fetch('/api/user/save-profile', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-          });
-          
-          if (saveResponse.ok) {
-            console.log('ユーザー情報をファイルに保存しました');
-          }
-        } catch (fileError) {
-          console.error('ファイル保存エラー:', fileError);
-        }
-        
         setIsSaved(true);
-        setMessage({ type: 'success', text: 'アカウント情報を保存しました（ローカルモード）' });
+        setMessage({ type: 'success', text: '設定をローカルに保存しました（オフラインモード）' });
         
         // 成功メッセージを表示して3秒後に消す
         setTimeout(() => {
@@ -186,7 +169,7 @@ const AccountSettings = () => {
         }, 3000);
       } catch (storageError) {
         console.error('ローカルストレージ保存エラー:', storageError);
-        setMessage({ type: 'error', text: 'プロファイル情報の保存に失敗しました' });
+        setMessage({ type: 'error', text: '設定の保存に失敗しました' });
       }
     } finally {
       setLoading(false);
@@ -205,6 +188,13 @@ const AccountSettings = () => {
             message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
           }`}>
             {message.text}
+          </div>
+        )}
+        
+        {/* 設定が保存済みの場合、メッセージを表示 */}
+        {isSaved && !message.text && (
+          <div className="p-3 mb-4 rounded-md bg-blue-50 text-blue-700">
+            現在の設定が保存されています
           </div>
         )}
         
